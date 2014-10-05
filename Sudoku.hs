@@ -17,6 +17,16 @@ mkSudoku = map digitToInt
 validSudoku :: Sudoku -> Bool
 validSudoku sud = all id $ map allUnique $ rows sud ++ cols sud ++ squares sud
 
+showSudoku :: Sudoku -> String
+showSudoku sud = unlines $ first3 ++ ["------+-------+------"] ++ second3 ++ ["------+-------+------"] ++ third3
+  where
+    rowStrs = map showLine $ rows sud
+    showLine = unwords . addColumns . map show
+    addColumns (n1:n2:n3:n4:n5:n6:n7:n8:n9:[]) = n1:n2:n3:"|":n4:n5:n6:"|":n7:n8:n9:[]
+    first3 = take 3 rowStrs
+    second3 = take 3 (drop 3 rowStrs)
+    third3  = drop 6 rowStrs
+
 rows :: Sudoku -> [[Int]]
 rows = splitEvery 9
 
