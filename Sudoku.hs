@@ -5,6 +5,7 @@ module Sudoku where
 
 import Data.Char
 import Data.List
+import Data.Maybe
 
 type Sudoku = [Int]
 
@@ -15,7 +16,7 @@ mkSudoku :: String -> Sudoku
 mkSudoku = map digitToInt
 
 validSudoku :: Sudoku -> Bool
-validSudoku sud = all id $ map allUnique $ rows sud ++ cols sud ++ squares sud
+validSudoku sud = all id $ mapAnd allUnique (all (<10)) $ rows sud ++ cols sud ++ squares sud
 
 showSudoku :: Sudoku -> String
 showSudoku sud = unlines $ first3 ++ ["------+-------+------"] ++ second3 ++ ["------+-------+------"] ++ third3
@@ -26,6 +27,28 @@ showSudoku sud = unlines $ first3 ++ ["------+-------+------"] ++ second3 ++ ["-
     first3 = take 3 rowStrs
     second3 = take 3 (drop 3 rowStrs)
     third3  = drop 6 rowStrs
+
+solveSudoku :: Sudoku -> Maybe Sudoku
+solveSudoku sud = do
+  let known = (/= 0)
+      first = takeWhile known sud
+      rest = dropWhile known sud
+  if null rest
+  then return first
+  else solve first rest 1
+  where
+    solve :: [Int] -> [Int] -> Int -> Maybe Sudoku
+    solve xs rst@(_:ys) guess
+      | guess > 9 = Nothing
+      | otherwise = do
+          let sudGuess = xs ++ guess:ys
+              nextGuess = solve xs rst (guess + 1) >>= solveSudoku
+              res = solveSudoku sudGuess
+          if validSudoku sudGuess
+          then if isNothing res
+               then nextGuess
+               else res
+          else nextGuess
 
 rows :: Sudoku -> [[Int]]
 rows = splitEvery 9
@@ -52,3 +75,6 @@ splitEvery n xs = take n xs : splitEvery n (drop n xs)
 allUnique :: [Int] -> Bool
 allUnique [] = True
 allUnique (x:xs) = (x == 0 || not (x `elem` xs)) && allUnique xs
+
+mapAnd :: (a -> Bool) -> (a -> Bool) -> [a] -> [Bool]
+mapAnd f1 f2 = map (\a -> f1 a && f2 a)
