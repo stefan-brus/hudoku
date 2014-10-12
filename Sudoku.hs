@@ -16,7 +16,7 @@ mkSudoku :: String -> Sudoku
 mkSudoku = map digitToInt
 
 validSudoku :: Sudoku -> Bool
-validSudoku sud = all id $ mapAnd allUnique (all (<10)) $ rows sud ++ cols sud ++ squares sud
+validSudoku sud = all id $ map (both allUnique (all (<10))) $ rows sud ++ cols sud ++ squares sud
 
 showSudoku :: Sudoku -> String
 showSudoku sud = unlines $ first3 ++ ["------+-------+------"] ++ second3 ++ ["------+-------+------"] ++ third3
@@ -76,5 +76,5 @@ allUnique :: [Int] -> Bool
 allUnique [] = True
 allUnique (x:xs) = (x == 0 || not (x `elem` xs)) && allUnique xs
 
-mapAnd :: (a -> Bool) -> (a -> Bool) -> [a] -> [Bool]
-mapAnd f1 f2 = map (\a -> f1 a && f2 a)
+both :: (a -> Bool) -> (a -> Bool) -> a -> Bool
+both f g x = (f x) && (g x)
