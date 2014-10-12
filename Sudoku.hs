@@ -29,26 +29,26 @@ showSudoku sud = unlines $ first3 ++ ["------+-------+------"] ++ second3 ++ ["-
     third3  = drop 6 rowStrs
 
 solveSudoku :: Sudoku -> Maybe Sudoku
-solveSudoku sud = do
-  let known = (/= 0)
-      first = takeWhile known sud
-      rest = dropWhile known sud
+solveSudoku sud =
   if null rest
   then return first
   else solve first rest 1
   where
+    known = (/= 0)
+    first = takeWhile known sud
+    rest = dropWhile known sud
     solve :: [Int] -> [Int] -> Int -> Maybe Sudoku
     solve xs rst@(_:ys) guess
       | guess > 9 = Nothing
-      | otherwise = do
+      | otherwise =
           let sudGuess = xs ++ guess:ys
               nextGuess = solve xs rst (guess + 1) >>= solveSudoku
               res = solveSudoku sudGuess
-          if validSudoku sudGuess
-          then if isNothing res
-               then nextGuess
-               else res
-          else nextGuess
+          in if validSudoku sudGuess
+             then if isNothing res
+                  then nextGuess
+                  else res
+             else nextGuess
 
 rows :: Sudoku -> [[Int]]
 rows = splitEvery 9
